@@ -1,1 +1,58 @@
+"""
+GIS Data Validation Script
+===========================
+Objective:
+- Check geometric and topological rules for urban inventory data.
+- Identify errors in spatial relationships (overlaps, intersections, topology).
+- Generate a report with non-compliant features.
+
+Input Data:
+- roads.gpkg : Contains road geometries (streets, bike lanes).
+- pedestrian_crossings.gpkg : Contains pedestrian crossing geometries.
+- green_spaces.gpkg : Contains green space geometries.
+- urban_mobility.gpkg : Contains urban furniture geometries.
+- infrastructure.gpkg : Contains network infrastructure geometries.
+
+Output:
+- errors_report.gpkg : Stores non-compliant geometries for correction.
+"""
+
+# 1) Import necessary libraries
+
+
+# 2) Load GIS data
+
+
+# 3) Validate road geometries
+## - Check for self-intersections
+## - Check for duplicate geometries
+## - Ensure roads are properly connected
+
+
+# 4) Validate pedestrian crossings
+## - Ensure crossings intersect roads or bike lanes
+## - Ensure at least two sides are connected to a road
+
+
+# 5) Validate vegetation data
+## - Ensure trees are inside green spaces
+## - Ensure trees are at least 1m apart
+
+
+# 6) Validate urban furniture
+## - Ensure objects are on a valid surface (not inside buildings or roads)
+## - Ensure they are properly connected to urban elements
+
+
+# 7) Validate network infrastructure
+## - Ensure infrastructure elements intersect roads or green spaces
+## - Validate spatial accuracy within the defined tolerance
+
+
+# 8) Identify and export errors
+## - Compile all detected issues
+## - Export non-compliant geometries for correction
+
+
+# 9) Display summary report
 

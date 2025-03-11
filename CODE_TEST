@@ -1,58 +1,49 @@
-"""
-GIS Data Validation Script
-===========================
-Objective:
-- Check geometric and topological rules for urban inventory data.
-- Identify errors in spatial relationships (overlaps, intersections, topology).
-- Generate a report with non-compliant features.
+# Code TEST 
 
-Input Data:
-- roads.gpkg : Contains road geometries (streets, bike lanes).
-- pedestrian_crossings.gpkg : Contains pedestrian crossing geometries.
-- green_spaces.gpkg : Contains green space geometries.
-- urban_mobility.gpkg : Contains urban furniture geometries.
-- infrastructure.gpkg : Contains network infrastructure geometries.
+## Fonctions génériques
 
-Output:
-- errors_report.gpkg : Stores non-compliant geometries for correction.
-"""
+import geopandas as gpd
+from shapely.geometry import Point, LineString, Polygon
 
-# 1) Import necessary libraries
+### 1) Vérifier la connectivité des entités linéaires (les lignes doivent toucher une autre ligne)
+def check_connectivity(gdf):
+    errors = []
+    for idx, line in gdf.iterrows():
+        touches = gdf[gdf.geometry.touches(line.geometry)]
+        if touches.empty:
+            errors.append(idx)
+    return errors
 
+### 2) Vérifier qu'il n'y a pas d'auto-intersection
+def check_no_self_intersection(gdf):
+    errors = [idx for idx, geom in gdf.geometry.items() if not geom.is_simple]
+    return errors
 
-# 2) Load GIS data
+### 3) Vérifier qu'une entité ne se superpose pas à elle-même
+def check_no_self_overlap(gdf):
+    errors = [idx for idx, geom in gdf.geometry.items() if geom.crosses(geom)]
+    return errors
 
+### 4) Vérifier que les géométries sont valides
+def check_valid_geometries(gdf):
+    errors = [idx for idx, geom in gdf.geometry.items() if not geom.is_valid]
+    return errors
 
-# 3) Validate road geometries
-## - Check for self-intersections
-## - Check for duplicate geometries
-## - Ensure roads are properly connected
+### 5) Vérifier la projection de la couche
+def check_projection(gdf, epsg=3945):
+    return gdf.crs.to_epsg() == epsg
 
+### 6) Vérifier les doublons géométriques
+def check_duplicate_geometries(gdf):
+    duplicated = gdf[gdf.duplicated(subset=["geometry"])]
+    return duplicated.index.tolist()
 
-# 4) Validate pedestrian crossings
-## - Ensure crossings intersect roads or bike lanes
-## - Ensure at least two sides are connected to a road
+### 7) Vérifier que chaque point est bien contenu dans une surface (ex. arbres dans un espace vert)
+def check_points_in_surface(points_gdf, surface_gdf):
+    errors = [idx for idx, point in points_gdf.geometry.items() if not any(point.within(poly) for poly in surface_gdf.geometry)]
+    return errors
 
-
-# 5) Validate vegetation data
-## - Ensure trees are inside green spaces
-## - Ensure trees are at least 1m apart
-
-
-# 6) Validate urban furniture
-## - Ensure objects are on a valid surface (not inside buildings or roads)
-## - Ensure they are properly connected to urban elements
-
-
-# 7) Validate network infrastructure
-## - Ensure infrastructure elements intersect roads or green spaces
-## - Validate spatial accuracy within the defined tolerance
-
-
-# 8) Identify and export errors
-## - Compile all detected issues
-## - Export non-compliant geometries for correction
-
-
-# 9) Display summary report
-
+### 8) Vérifier que les lignes intersectent une surface donnée (ex. passage piéton doit toucher une route)
+def check_lines_intersect_surface(lines_gdf, surface_gdf):
+    errors = [idx for idx, line in lines_gdf.geometry.items() if not any(line.intersects(poly) for poly in surface_gdf.geometry)]
+    return errors
